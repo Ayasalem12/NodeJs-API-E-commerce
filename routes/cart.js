@@ -10,15 +10,14 @@ const {
     updateCartItemQuantity
 } = require('../controllers/cart')
 
-router.use(auth, restrictTo('user','admin'));
 
-router
-   .post(addItemToCart)
-   .get(getLoggedUserCart)
-   .delete(deleteCart);
-router
-  .route('/:productId')
-  .put(updateCartItemQuantity)
-  .delete(removeProductFromCart);
+
+router.post('/addCart',addItemToCart,auth, restrictTo('user','admin'))
+router.get('/:id/getCart',getLoggedUserCart,auth, restrictTo('user','admin'))
+
+router.delete('/:id/delete',deleteCart,auth, restrictTo('user','admin'));
+
+router.put('/:productId',updateCartItemQuantity,auth, restrictTo('user','admin'))
+router.delete('/:productId',removeProductFromCart,auth, restrictTo('user','admin'));
 
 module.exports = router;
