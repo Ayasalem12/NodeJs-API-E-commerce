@@ -3,9 +3,12 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const multer  = require('multer')
+const multer  = require('multer');
+const AppError = require('./utils/ApiError');
 const usersRoutes = require('./routes/users');
-const AppError = require('./utlis/AppError')
+const productsRoutes = requirs('./routes/products');
+const cartRoutes = requirs('./routes/cart');
+const ordersRoutes = requirs('./routes/orders');
 const port = 3000;
 
 dotenv.config();
@@ -34,7 +37,10 @@ app.set('view engine', 'pug');
 app.set('views', './views'); // Set the views directory
 // Routes
 
-app.use('/users', usersRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/products', productsRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', ordersRoutes);
 
 // Custom 404 Middleware 
 app.use((req, res, next) => {
