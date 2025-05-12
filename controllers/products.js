@@ -30,7 +30,7 @@ exports.getByUserId = catchAsync(async (req, res, next) => {
 
 // POST /products
 exports.save = catchAsync(async (req, res, next) => {
-    const { name, description, price, image } = req.validatedBody;
+    // const { name, description, price, image } = req.validatedBody;
     const userId = req.id;
 
     const userExists = await usersModel.findById(userId);
@@ -45,7 +45,7 @@ exports.save = catchAsync(async (req, res, next) => {
 // PATCH /products/:id
 exports.update = catchAsync(async (req, res, next) => {
     const { id } = req.params;
-    const { name, description, price, image } = req.validatedBody;
+    // const { name, description, price, image } = req.validatedBody;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return next(new AppError(400, 'Invalid ID format'));

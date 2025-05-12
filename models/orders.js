@@ -4,10 +4,10 @@ const { Schema, model } = mongoose;
 const ordersSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
-        ref: 'Users',
+        ref: 'User',
         required: [true, 'User ID is required'],
     },
-    items: [{
+    cartItems: [{
         product: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Product',
@@ -29,17 +29,45 @@ const ordersSchema = new Schema({
         enum: ['pending', 'shipped', 'delivered', 'cancelled'],
         default: 'pending',
     },
-    totalPrice: {
+    totalOrderPrice: {
         type: Number,
         required: [true, 'Total price is required'],
         min: [0, 'Total price cannot be negative'],
     },
-    order_date:{
+    shippingAddress: {
+      details: String,
+      phone: String,
+      city: String,
+      postalCode: String,
+    },
+    shippingPrice: {
+      type: Number,
+      default: 0,
+    },
+    isPaid: {
+      type: Boolean,
+      default: false,
+    },
+    paidAt: {type:Date},
+    orderDate:{
         type: Date
     },
 }, {
     timestamps: true, 
 });
 
-const ordersModel = model('Orders', ordersSchema);
+ordersSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'userId',
+    select: 'name email role',
+  }).populate({
+    path: 'cartItems.product',
+    select: 'name description',
+  });
+
+  next();
+});
+
+
+const ordersModel = model('Order', ordersSchema);
 module.exports = ordersModel;

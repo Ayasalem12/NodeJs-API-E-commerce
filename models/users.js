@@ -23,10 +23,10 @@ const userSchema = new Schema({
         type: String,
         required: [true, 'Password is required'],
     },
-    image: {
-        type: String,
-        required: false, 
-    },
+    passwordChangedAt: {type: Date},
+    passwordResetCode: {type:String},
+    passwordResetExpires: {type:Date},
+    passwordResetVerified: {type:Boolean},
 }, {
     timestamps: true, 
 });
@@ -36,5 +36,5 @@ userSchema.pre("save",async function(next){
     this.password = hashedPassword;
     next();
 })
-const usersModel = model('Users', userSchema);
+const usersModel = model('User', userSchema);
 module.exports = usersModel;

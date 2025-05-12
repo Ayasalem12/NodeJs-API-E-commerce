@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler'); //Simple middleware for handling exceptions inside of async express routes and passing them to your express error handlers.
 const express = require('express');
 const ApiError = require ('../utils/ApiError');
-const ApiFeatures = require('./apiFeaturesapiFeatures')
+const ApiFeatures = require('../utils/apiFeatures')
 exports.delete = (Model) =>
     asyncHandler(async (req , res ,next)=>{
         const {id} = req.params

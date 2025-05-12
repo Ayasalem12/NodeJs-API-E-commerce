@@ -4,11 +4,11 @@ const app = express();
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const multer  = require('multer');
-const AppError = require('./utils/ApiError');
+const ApiError = require('./utils/ApiError');
 const usersRoutes = require('./routes/users');
-const productsRoutes = requirs('./routes/products');
-const cartRoutes = requirs('./routes/cart');
-const ordersRoutes = requirs('./routes/orders');
+const productsRoutes = require('./routes/products');
+const cartRoutes = require('./routes/cart');
+// const ordersRoutes = require('./routes/orders');
 const port = 3000;
 
 dotenv.config();
@@ -40,11 +40,11 @@ app.set('views', './views'); // Set the views directory
 app.use('/api/users', usersRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/cart', cartRoutes);
-app.use('/api/orders', ordersRoutes);
+// app.use('/api/orders', ordersRoutes);
 
 // Custom 404 Middleware 
 app.use((req, res, next) => {
-  next(new AppError(404,'Route not found'))
+  next(new ApiError(404,'Route not found'))
   // res.status(404).json({ status: "fail", message: "Route not found" });
 });
 

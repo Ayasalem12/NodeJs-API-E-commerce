@@ -4,7 +4,7 @@ const { Schema, model } = mongoose;
 const productsSchema = new Schema({
     sellerId: {
         type: Schema.Types.ObjectId,
-        ref: 'Users',
+        ref: 'User',
         required: [true, 'User ID is required'],
     },
     name: {
@@ -29,14 +29,19 @@ const productsSchema = new Schema({
         min: [0, 'Stock cannot be negative'],
         default: 0,
     },
+    sold: {
+        type: Number,
+        min: [0,],
+        default: 0,
+    },
     image: {
         type: String,
-        required: [true, 'Product image URL is required'], 
+        required: [false, 'Product image URL is required'], 
     },
     
 }, {
     timestamps: true, 
 });
 
-const productsModel = model('Products', productsSchema);
+const productsModel = model('Product', productsSchema);
 module.exports = productsModel;

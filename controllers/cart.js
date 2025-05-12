@@ -2,8 +2,8 @@ const mongoose = require('mongoose')
 const cartModel = require('../Models/cart')
 const usersModel = require('../Models/users')
 const productsModel = require('../Models/products')
-const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/ApiError');
+const {catchAsync} = require('../utils/catchAsync');
+const ApiError = require('../utils/ApiError');
 const { delete: deleteOne, getOne } = require('../services/handlersFactory');
 
 const calcTotalpriceCart = (cart) =>{
@@ -19,21 +19,21 @@ exports.addItemToCart = catchAsync( async (req,res,next) =>{
     const userId = req.id;
     const {productId,name, description,price,image,quantity } = req.validatedBody;
     if(!userId){
-        return next(new AppError(404,'User not found'));
+        return next(new ApiError(404,'User not found'));
     }
     if (!productId){
-        return next(new AppError(400, 'Invalid product'));
+        return next(new ApiError(400, 'Invalid product'));
     }
     let productAvailable = await productsModel?.findOne({_id: req.body.productId});
       console.log(productAvailable);
     if (!productAvailable) {
-        return next(new AppError(404, 'Product not found'));
+        return next(new ApiError(404, 'Product not found'));
     }
     if (productAvailable.stock < quantity) {
-        return next(new AppError(400, 'Out of stock'));
+        return next(new ApiError(400, 'Out of stock'));
     }
     if(quantity == -1 && quantity==0){
-        return next(new AppError(400, 'Invalid quantity'))
+        return next(new ApiError(400, 'Invalid quantity'))
     }
     const cart =  await cartModel.findOne({ userId: userId });
     if(cart){
@@ -63,16 +63,16 @@ exports.getLoggedUserCart = catchAsync(async (req, res, next) => {
     const {id} = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return next(new AppError(400,'Invalid ID format'));
+        return next(new ApiError(400,'Invalid ID format'));
     }
 
     const cart = await cartModel.findById(id);
     if (!cart) {
-        return next(new AppError(404,'Cart not found'));
+        return next(new ApiError(404,'Cart not found'));
     }
 
     if (cart.userId.toString() !== req.id && req.role !== 'admin') {
-        return next(new AppError(403, 'You can only view your own cart'));
+        return next(new ApiError(403, 'You can only view your own cart'));
     }
 
     return getOne(cartModel)(req, res, next);
@@ -82,16 +82,16 @@ exports.deleteCart = catchAsync(async (req, res, next) => {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return next(new AppError(400, 'Invalid ID format'));
+        return next(new ApiError(400, 'Invalid ID format'));
     }
 
     const cart = await cartModel.findById(id);
     if (!cart) {
-        return next(new AppError(404, 'Cart not found'));
+        return next(new ApiError(404, 'Cart not found'));
     }
 
     if (cart.userId.toString() !== req.id && req.role !== 'admin') {
-        return next(new AppError(403, 'You can only delete your own cart'));
+        return next(new ApiError(403, 'You can only delete your own cart'));
     }
 
     return deleteOne(cartModel)(req, res, next);
@@ -102,10 +102,10 @@ exports.removeProductFromCart = catchAsync(async (req, res, next) =>{
     const {productId} = req.params;
     const userId = req.id;
     if (!mongoose.Types.ObjectId.isValid(productId)) {
-        return next(new AppError(400, 'Invalid ID format'));
+        return next(new ApiError(400, 'Invalid ID format'));
     }
     if(!userId){
-        return next(new AppError(404,'User not found'));
+        return next(new ApiError(404,'User not found'));
     }
     const cart = await cartModel.findOneAndUpdate(
         { user: userId },

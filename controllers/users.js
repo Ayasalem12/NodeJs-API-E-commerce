@@ -1,4 +1,5 @@
 const bcryptjs = require('bcryptjs');
+const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const usersModel = require('../Models/users');
 const { catchAsync } = require('../utils/catchAsync');
@@ -6,15 +7,15 @@ const AppError = require('../utils/ApiError');
 const { create, update, delete: deleteOne, getOne, getAll } = require('../services/handlersFactory');
 
 // POST /users
-exports.save = catchAsync(async (req, res, next) => {
-    const { username, email, password, role } = req.validatedBody;
+exports.save = create(usersModel);
 
-    if (role === 'admin' && (!req.role || req.role !== 'admin')) {
-        return next(new AppError(403, 'Only admins can register admin users'));
-    }
-
-    return create(usersModel)(req, res, next);
-});
+// exports.save = catchAsync(async (req, res, next) => {
+//     const { role } = req.validatedBody;
+//     if (role === 'admin' && (!req.role || req.role !== 'admin')) {
+//         return next(new AppError(403, 'Only admins can register admin users'));
+//     }
+//     return create(usersModel)(req, res, next);
+// });
 
 // GET /users
 exports.getAll = getAll(usersModel);
@@ -60,38 +61,6 @@ exports.login = catchAsync(async (req, res, next) => {
     res.status(200).json({ message: 'User logged in successfully', data: { token } });
 });
 
-// POST /users/forgot-password
-// exports.forgotPassword = catchAsync(async (req, res, next) => {
-//     const { email } = req.validatedBody;
-//     const user = await usersModel.findOne({ email });
-//     if (!user) {
-//         return next(new AppError(404, 'User not found'));
-//     }
-
-//     const resetToken = jwt.sign({ id: user._id }, process.env.SECRET_KEY, { expiresIn: '1h' });
-//     res.status(200).json({ message: 'Reset token generated', resetToken });
-// });
-
-// POST /users/reset-password
-// exports.resetPassword = catchAsync(async (req, res, next) => {
-//     const { token, password } = req.validatedBody;
-
-//     try {
-//         const decoded = jwt.verify(token, process.env.SECRET_KEY);
-//         const user = await usersModel.findById(decoded.id);
-//         if (!user) {
-//             return next(new AppError(404, 'User not found'));
-//         }
-
-//         const salt = await bcryptjs.genSalt(10);
-//         user.password = await bcryptjs.hash(password, salt);
-//         await user.save();
-
-//         res.status(200).json({ message: 'Password reset successfully' });
-//     } catch (err) {
-//         return next(new AppError(400, 'Invalid or expired token'));
-//     }
-// });
 
 
 
@@ -109,7 +78,10 @@ exports.login = catchAsync(async (req, res, next) => {
 
 
 
-// const mongoose = require('mongoose');
+
+
+
+
 // const bcryptjs = require('bcryptjs');
 // const jwt = require('jsonwebtoken');
 // const usersModel = require('../Models/users');
