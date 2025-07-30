@@ -4,6 +4,9 @@ const app = express();
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const multer  = require('multer');
+// const bodyParser = require("body-parser");
+
+
 const ApiError = require('./utils/ApiError');
 const usersRoutes = require('./routes/users');
 const productsRoutes = require('./routes/products');
@@ -15,7 +18,7 @@ dotenv.config();
 
 // Middleware
 app.use(express.json());
-
+// app.use(bodyParser.urlencoded({ extended: true }));
 // uploads file
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {

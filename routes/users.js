@@ -7,7 +7,6 @@ const { validation } = require('../middleware/validation');
 const registerSchema = require('../validation/register.validation');
 const loginSchema = require('../validation/login.validation');
 const { updateUserSchema } = require('../validation/updateUser.validation');
-
 // POST /users - Register a user
 router.post('/register', validation(registerSchema), save);
 

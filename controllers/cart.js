@@ -9,7 +9,9 @@ const { delete: deleteOne, getOne } = require('../services/handlersFactory');
 const calcTotalpriceCart = (cart) =>{
     let totalPrice = 0;
     cart.products.forEach((product) =>{
-        totalPrice +=product.quantity * product.price
+        // totalPrice +=product.quantity * product.price
+        totalPrice = cart.products.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
     });
     cart.totalCartPrice = totalPrice;
     return totalPrice
@@ -17,14 +19,15 @@ const calcTotalpriceCart = (cart) =>{
 }
 exports.addItemToCart = catchAsync( async (req,res,next) =>{
     const userId = req.id;
-    const {productId,name, description,price,image,quantity } = req.validatedBody;
+    // const {productId,name, description,price,image,quantity } = req.validatedBody;
+    const {productId,name, description,price,image,quantity } = req.body;
     if(!userId){
         return next(new ApiError(404,'User not found'));
     }
     if (!productId){
         return next(new ApiError(400, 'Invalid product'));
     }
-    let productAvailable = await productsModel?.findOne({_id: req.body.productId});
+    let productAvailable = await productsModel?.findOne({_id: productId});
       console.log(productAvailable);
     if (!productAvailable) {
         return next(new ApiError(404, 'Product not found'));
@@ -32,26 +35,39 @@ exports.addItemToCart = catchAsync( async (req,res,next) =>{
     if (productAvailable.stock < quantity) {
         return next(new ApiError(400, 'Out of stock'));
     }
-    if(quantity == -1 && quantity==0){
+    productAvailable.stock -= quantity;
+    productAvailable.sold += quantity;
+await productAvailable.save();
+
+    if(quantity <= 0){
         return next(new ApiError(400, 'Invalid quantity'))
     }
-    const cart =  await cartModel.findOne({ userId: userId });
+    let cart =  await cartModel.findOne({ userId: userId });
+
     if(cart){
-        let itemIndex = cart.products.findIndex((product) => product.productId == productId)
+        let itemIndex = cart.products.findIndex((p) => p.product.toString() == productId)
         if(itemIndex > -1){
-            let productItem = cartModel.products[itemIndex]
-            productItem.quantity +=quantity;
-            // productItem.price += productItem.quantity * price;
-            cart.products[itemIndex]=productItem
+            cart.products[itemIndex].quantity += quantity;
         }else{
-            cart.products.push({ productId: productId, name:name,quantity: quantity, description: description, image: image, price: price })
+            cart.products.push({ product: productId, name:name,quantity: quantity, description: description, image: image, price: price })
         }
-        calcTotalpriceCart(cart)
+        calcTotalpriceCart(cart);
         cart = await cart.save();
         return res.status(200).json({ message: "Updated Cart Successfully!", updatedCart: cart });
     }else{
-        const newCart = await cart.create({ productId: productId, name:name,quantity: 1, description: description, image: image, price: price ,userId})
-        return res.status(200).json({ message: "Created New Cart Successfully!", numOfCartProducts: cart.products.length,newCart: newCart });
+        const newCart = await cartModel.create({
+            userId,
+            products: [{
+              product: productId,
+              name: name,
+              quantity: quantity,
+              description: description,
+              image: image,
+              price: price
+            }],
+            totalCartPrice: quantity * price
+          });
+          return res.status(200).json({ message: "Created New Cart Successfully!", numOfCartProducts: newCart.products.length,newCart: newCart });
     }
     
 
@@ -98,27 +114,43 @@ exports.deleteCart = catchAsync(async (req, res, next) => {
 });
 
 // remove specific product from cart
-exports.removeProductFromCart = catchAsync(async (req, res, next) =>{
-    const {productId} = req.params;
+exports.removeProductFromCart = catchAsync(async (req, res, next) => {
     const userId = req.id;
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
-        return next(new ApiError(400, 'Invalid ID format'));
-    }
-    if(!userId){
-        return next(new ApiError(404,'User not found'));
-    }
-    const cart = await cartModel.findOneAndUpdate(
-        { user: userId },
-        {
-        $pull: { products: { _id: productId } },
-        },
-        { new: true }
-    )
-    calcTotalpriceCart(cart);
-    cart.save();
-     return res.status(200).json({ message: "Created New Cart Successfully!", numOfCartProducts: cart.products.length,cart: cart });
+    const { productId } = req.body;
+  
+    const cart = await cartModel.findOne({ userId });
+    if (!cart) return next(new ApiError(404, 'Cart not found'));
+  
+    const itemIndex = cart.products.findIndex(
+      (p) => p.product.toString() === productId
+    );
+  
+    if (itemIndex === -1) return next(new ApiError(404, 'Product not in cart'));
+  
+    const removedProduct = cart.products[itemIndex];
+    // const removedQuantity = removedItem.quantity;
+    // const removedPrice = removedItem.price;
+  
+    // Increase stock
+    await productsModel.findByIdAndUpdate(productId, {
+      $inc: { stock: removedProduct.quantity,sold: -removedProduct.quantity },
+    });
+  
+    // Remove from cart
+    cart.products.splice(itemIndex, 1);
 
-})
+    calcTotalpriceCart(cart);
+    await cart.save();
+
+    const product = await productsModel.findById(productId);
+  if (product) {
+    product.stock +=  removedProduct.quantity;
+    product.sold = Math.max((product.sold || 0) -  removedProduct.quantity, 0); 
+    await product.save();
+  }
+    return res.status(200).json({ message: 'Item removed from cart', cart });
+  });
+  
 
 //clear cart
 // exports.clearCart = catchAsync(async (req, res, next) => {

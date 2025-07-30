@@ -6,20 +6,21 @@ const { createProductSchema, updateProductSchema } = require('../validation/prod
 const {getById,getByUserId,save,update,deleteProduct,getAll} = require('../controllers/products');
 
 // POST /products - Create Product 
-router.post('/create-product', validation(createProductSchema), save);
+// router.post('/create-product', validation(createProductSchema), save);
+router.post('/create-product', auth, restrictTo('seller'), validation(createProductSchema), save);
 
 // GET /products - Get all users
 router.get('/',auth,getAll);
 
 // GET /product/:id 
-router.get('/:id',getById);
+router.get('/product/:id',getById);
 // GET /product/:id (seller created it)
 router.get('/:userId/:id',auth, restrictTo('admin','seller'),getByUserId);
 
 // DELETE /product/:id - Delete a product (admin or seller)
-router.delete('/:id', auth, restrictTo('admin','seller'), deleteProduct);
+router.delete('/product/:id', auth, restrictTo('admin','seller'), deleteProduct);
 
 // PATCH /product/:id - Update a product (admin or seller)
-router.patch('/:id',auth, restrictTo('admin','seller'),validation(updateProductSchema), update);
+router.patch('/product/:id',auth, restrictTo('admin','seller'),validation(updateProductSchema), update);
 
 module.exports = router;

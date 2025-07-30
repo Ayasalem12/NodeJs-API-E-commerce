@@ -5,8 +5,8 @@ const registerSchema = Joi.object({
         'string.empty': 'Username is required',
         'any.required': 'Username is required',
     }),
-    role: Joi.string().valid('user', 'admin').insensitive().default('user').messages({
-        'any.only': 'Role must be either "user" or "admin"',
+    role: Joi.string().valid('user', 'admin','seller').insensitive().default('user').messages({
+        'any.only': 'Role must be either "user" or "admin" or "seller"',
     }),
     email: Joi.string().email().required().messages({
         'string.email': 'Email must be a valid email address',

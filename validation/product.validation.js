@@ -24,11 +24,12 @@ const createProductSchema = Joi.object({
         'string.empty': 'stock is required',
         'any.required': 'stock is required',
     }),
+    sold: Joi.number().default(0)
     
-});
+}).options({ stripUnknown: true }); // This line removes unknown fields silently;
 
 const updateProductSchema = Joi.object({
-    tname: Joi.string().trim().min(3).max(20).required().messages({
+    name: Joi.string().trim().min(3).max(20).required().messages({
         'string.min': 'Title must be at least 5 characters',
         'string.max': 'Title cannot exceed 20 characters',
         'string.empty': 'Title is required',
@@ -49,6 +50,8 @@ const updateProductSchema = Joi.object({
         'string.empty': 'stock is required',
         'any.required': 'stock is required',
     }),
-});
+    sold: Joi.number().default(0),
+    
+}).options({ stripUnknown: true }); // This line removes unknown fields silently;
 
 module.exports = { createProductSchema, updateProductSchema };

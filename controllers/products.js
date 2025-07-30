@@ -43,25 +43,26 @@ exports.save = catchAsync(async (req, res, next) => {
 });
 
 // PATCH /products/:id
-exports.update = catchAsync(async (req, res, next) => {
-    const { id } = req.params;
-    // const { name, description, price, image } = req.validatedBody;
+exports.update = update(productsModel);
+// exports.update = catchAsync(async (req, res, next) => {
+//     const { id } = req.params;
+//     // const { name, description, price, image } = req.validatedBody;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return next(new AppError(400, 'Invalid ID format'));
-    }
+//     if (!mongoose.Types.ObjectId.isValid(id)) {
+//         return next(new AppError(400, 'Invalid ID format'));
+//     }
 
-    const product = await productsModel.findById(id);
-    if (!product) {
-        return next(new AppError(404, 'Product not found'));
-    }
+//     const product = await productsModel.findById(id);
+//     if (!product) {
+//         return next(new AppError(404, 'Product not found'));
+//     }
 
-    if (product.sellerId.toString() !== req.id) {
-        return next(new AppError(403, 'You can only update your own products'));
-    }
+//     if (product.sellerId.toString() !== req.id) {
+//         return next(new AppError(403, 'You can only update your own products'));
+//     }
 
-    return update(productsModel)(req, res, next);
-});
+//     return update(productsModel)(req, res, next);
+// });
 
 // DELETE /products/:id
 exports.deleteProduct = catchAsync(async (req, res, next) => {
@@ -207,7 +208,7 @@ exports.searchProducts = catchAsync(async (req, res, next) => {
 //     if (price) updateData.price = price;
 //     if (image) updateData.image = image;
 
-//     product = await productsModel.findByIdAndUpdate(id, updateData, { new: true }).populate('userId', 'username');
+//     product = await productsModel.findByIdAndUpdate(id, updateData, { new: true }).populate('userId', 'name');
 //     res.status(200).json({ message: 'Success update product', data: product });
 // });
 

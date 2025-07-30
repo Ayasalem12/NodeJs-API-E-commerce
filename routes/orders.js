@@ -11,6 +11,7 @@ const {
     updateOrderToDelivered,
     checkoutSession
 } = require ("../controllers/orders");
+
 router.get('/checkout-session/:cartId',auth,restrictTo('user'),checkoutSession);
 router.post('/:cartId',auth,restrictTo('user'),createCashOrder);
 router.get('/',auth,restrictTo('user','admin'),getAllOrders);

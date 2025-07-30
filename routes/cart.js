@@ -8,16 +8,17 @@ const {
     removeProductFromCart,
     // clearCart,
     updateCartItemQuantity
-} = require('../controllers/cart')
+} = require('../controllers/cart');
 
 
+// const { validation } = require('../middleware/validation');
 
-router.post('/addCart',addItemToCart,auth, restrictTo('user','admin'))
-router.get('/:id/getCart',getLoggedUserCart,auth, restrictTo('user','admin'))
 
-router.delete('/:id/delete',deleteCart,auth, restrictTo('user','admin'));
-
-router.put('/:productId',updateCartItemQuantity,auth, restrictTo('user','admin'))
-router.delete('/:productId',removeProductFromCart,auth, restrictTo('user','admin'));
+router.post('/addCart', auth, restrictTo('user','admin'), addItemToCart);
+router.get('/:id/getCart', auth, restrictTo('user','admin'), getLoggedUserCart);
+router.delete('/:id/delete', auth, restrictTo('user','admin'), deleteCart);
+router.put('/:productId', auth, restrictTo('user','admin'), updateCartItemQuantity);
+// router.delete('/:productId', auth, restrictTo('user','admin'), removeProductFromCart);
+router.delete('/delete-product-from-cart', auth, restrictTo('user','admin'), removeProductFromCart);
 
 module.exports = router;

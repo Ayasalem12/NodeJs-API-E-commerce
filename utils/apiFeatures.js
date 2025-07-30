@@ -19,7 +19,7 @@ class ApiFeatures{
             const sortBy = this.queryString.sort.split(',').join(' ');
             this.mogooseQuery = this.mogooseQuery.sort(sortBy);
         }else{
-            this.mogooseQuery = this.mogooseQuery.sort('-createAt');
+            this.mogooseQuery = this.mogooseQuery.sort('-createdAt');
         }
         return this;
     }
@@ -44,7 +44,8 @@ class ApiFeatures{
             }else{
                 query = {name:{$regex:keyword,$options:'i'}}
             }
-            this.mogooseQuery = this.mogooseQuery.find(query);
+            this.mogooseQuery = this.mogooseQuery.where(query);
+            // this.mogooseQuery = this.mogooseQuery.find({ ...existingFilters, ...query });
         }
         return this;
     }

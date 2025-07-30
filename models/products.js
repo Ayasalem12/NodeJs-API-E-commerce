@@ -31,7 +31,7 @@ const productsSchema = new Schema({
     },
     sold: {
         type: Number,
-        min: [0,],
+        min: [0,'Sold cannot be negative'],
         default: 0,
     },
     image: {

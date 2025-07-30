@@ -56,15 +56,16 @@ exports.getAll = (Model,modelName ='') =>
                 filters = req.filter
             }
             const documentsCounts = await Model.countDocuments();
-            const apiFeatures = new ApiFeatures(Model.find(filter),req.query)
+            const apiFeatures = new ApiFeatures(Model.find(),req.query)
             .paginate(documentsCounts)
             .filter()
             .search(modelName)
             .limitFields()
             .sort();
             //execute query
-            const { mongooseQuery, paginationResult } = apiFeatures;
-            const documents = await mongooseQuery;
+            const { mogooseQuery, paginationResult } = apiFeatures;
+            const documents = await mogooseQuery;
+            console.log(documents)
             res.status(200).json({message: 'Data found successfully', data:documents,paginationResult, data: documents })
         }
     );
