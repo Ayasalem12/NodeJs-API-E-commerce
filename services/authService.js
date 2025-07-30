@@ -7,14 +7,14 @@ const ApiError = require('../utils/ApiError');
 const {catchAsync} = require('../utils/catchAsync');
 const sendEmail = require('../utils/sendEmail');
 
-const User = require('../models/userModel');
+const User = require('../Models/users');
 
-exports.forgotPassword = catchAsync(async (req, res, next) => {
+exports.forgetPassword = catchAsync(async (req, res, next) => {
   // 1) Get user by email
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
     return next(
-      new ApiError(`There is no user with that email ${req.body.email}`, 404)
+      new ApiError(404,`There is no user with that email ${req.body.email}`)
     );
   }
   // 2) If user exist, Generate hash reset random 6 digits and save it in db
@@ -33,20 +33,22 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   await user.save();
 
   // 3) Send the reset code via email
-  const message = `Hi ${user.name},\n We received a request to reset the password on your E-shop Account. \n ${resetCode} \n Enter this code to complete the reset. \n Thanks for helping us keep your account secure.\n The E-shop Team`;
+  const message = `Hi ${user.username},\n We received a request to reset the password on your E-shop Account. \n ${resetCode} \n Enter this code to complete the reset. \n Thanks for helping us keep your account secure.\n The E-shop Team`;
   try {
     await sendEmail({
       email: user.email,
       subject: 'Your password reset code (valid for 10 min)',
       message,
     });
+    console.log('Reset message to be sent:', message);
+    res.status(200).json({ status: 'success', message: 'Code sent to email successfully' });
   } catch (err) {
     user.passwordResetCode = undefined;
     user.passwordResetExpires = undefined;
     user.passwordResetVerified = undefined;
 
     await user.save();
-    return next(new ApiError('There is an error in sending email', 500));
+    return next(new ApiError(500,'There is an error in sending email'));
   }
 });
 
@@ -62,30 +64,29 @@ exports.verifyPassResetCode = catchAsync(async (req, res, next) => {
     passwordResetExpires: { $gt: Date.now() },
   });
   if (!user) {
-    return next(new ApiError('Reset code invalid or expired'));
+    return next(new ApiError(400, 'Reset code invalid or expired'));
   }
 
   // 2) Reset code valid
   user.passwordResetVerified = true;
   await user.save();
 
-  res.status(200).json({
-    status: 'Success',
-  });
+  res.status(200).json({ status: 'success', message: 'Code verified successfully' });
+
 });
 
-exports.resetPassword = asyncHandler(async (req, res, next) => {
+exports.resetPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on email
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
     return next(
-      new ApiError(`There is no user with email ${req.body.email}`, 404)
+      new ApiError(404,`There is no user with email ${req.body.email}`)
     );
   }
 
   // 2) Check if reset code verified
   if (!user.passwordResetVerified) {
-    return next(new ApiError('Reset code not verified', 400));
+    return next(new ApiError(400,'Reset code not verified'));
   }
 
   user.password = req.body.newPassword;

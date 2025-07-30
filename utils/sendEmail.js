@@ -1,34 +1,25 @@
 const nodemailer = require('nodemailer');
 
-// Nodemailer
 const sendEmail = async (options) => {
-  // 1) Create transporter ( service that will send email like "gmail","Mailgun", "mialtrap", sendGrid)
+  // 1) Create transporter
   const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT, // if secure false port = 587, if true port= 465
-    // secure: true,
+    service: 'Gmail',
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
+      user: process.env.EMAIL_USER, 
+      pass: process.env.EMAIL_PASS, 
     },
   });
 
-  // 2) Define email options (like from, to, subject, email content)
-  const mailOpts = {
-    from: `E-shop App <${process.env.EMAIL_USER}>`,
+  // 2) Define the email options
+  const mailOptions = {
+    from: 'E-Shop <' + process.env.EMAIL_USER + '>',
     to: options.email,
     subject: options.subject,
-    text: options.message,
+    
   };
 
-  // 3) Send email
-  try {
-    await transporter.sendMail(mailOpts);
-    console.log(`Email sent to ${options.email}`);
-  } catch (error) {
-    console.error(`Error sending email: ${error.message}`);
-    throw new Error(`Failed to send email: ${error.message}`);
-  }
+  // 3) Send the email
+  await transporter.sendMail(mailOptions);
 };
 
 module.exports = sendEmail;

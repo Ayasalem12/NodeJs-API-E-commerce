@@ -7,6 +7,7 @@ const { validation } = require('../middleware/validation');
 const registerSchema = require('../validation/register.validation');
 const loginSchema = require('../validation/login.validation');
 const { updateUserSchema } = require('../validation/updateUser.validation');
+const { forgetPassword, verifyPassResetCode, resetPassword } = require('../services/authService');
 // POST /users - Register a user
 router.post('/register', validation(registerSchema), save);
 
@@ -25,6 +26,13 @@ router.delete('/:id', auth, restrictTo('admin'), deleteUser);
 // PATCH /users/:id - Update a user
 router.patch('/:id', validation(updateUserSchema), update);
 
+// Forgot password
+router.post('/forgetPassword', forgetPassword);
 
+// Verify reset code
+router.post('/verifyResetCode', verifyPassResetCode);
+
+// Reset password
+router.post('/resetPassword', resetPassword);
 
 module.exports = router;
